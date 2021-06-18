@@ -45,56 +45,59 @@ public:
         string str_month = read_date(date, index);
         string str_day = read_date(date, index);
 
+        int year, month, day;
+
         try{
-            int check = stoi(str_year.c_str());
-
-            int size = str_year.size();
-            if(size > 4){
-                throw exception();
-            }
-
-            for(int i = size; i < 4; i++){
-                str_year += '0';
-            }
+            year = stoi(str_year.c_str());
         }catch (exception& ex){
             string message = "Wrong date format: " + date;
             throw exception(message.c_str());
         }
 
         try{
-            int check = stoi(str_day.c_str());
+            month = stoi(str_month.c_str());
 
-            int size = str_year.size();
-            if(size > 2){
+            if(month > 12 || month < 1){
                 throw exception();
             }
-
-            for(int i = size; i < 2; i++){
-                str_year += '0';
-            }
         }catch (exception& ex){
-            string message = "Wrong date format: " + date;
+            string message = "Month value is invalid: " + str_month;
             throw exception(message.c_str());
         }
+
+        try{
+            day = stoi(str_day.c_str());
+
+            if(day > 31 || day < 1){
+                throw exception();
+            }
+        }catch (exception& ex){
+            string message = "Day value is invalid: " + str_day;
+            throw exception(message.c_str());
+        }
+
+        this->year = year;
+        this->month = month;
+        this->day =day;
 
     }
 
-    string GetYear() const{
+    int GetYear() const{
         return year;
     }
 
-    string GetMonth() const{
+    int GetMonth() const{
         return month;
     }
 
-    string GetDay() const{
+    int GetDay() const{
         return day;
     }
 
 private:
-    string year;
-    string month;
-    string day;
+    int year;
+    int month;
+    int day;
 };
 
 bool operator<(const Date& lhs, const Date& rhs);
@@ -132,7 +135,6 @@ int main() {
 
     string command;
     while (getline(cin, command)) {
-        // Считайте команды с потока ввода и обработайте каждую
         if(command.empty())
             continue;
 
@@ -146,7 +148,7 @@ int main() {
             try{
                 Date date(str_date);
             }catch (exception& ex){
-                cout << "Wrong date format: " << ex.what();
+                cout << ex.what();
             }
         }else if(operation == "Del"){
 
