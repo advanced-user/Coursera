@@ -2,6 +2,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
@@ -61,7 +63,7 @@ public:
                 throw exception();
             }
         }catch (exception& ex){
-            string message = "Month value is invalid: " + str_month;
+            string message = "Month value is invalid: " + to_string(month);
             throw exception(message.c_str());
         }
 
@@ -72,7 +74,7 @@ public:
                 throw exception();
             }
         }catch (exception& ex){
-            string message = "Day value is invalid: " + str_day;
+            string message = "Day value is invalid: " + to_string(day);
             throw exception(message.c_str());
         }
 
@@ -100,23 +102,78 @@ private:
     int day;
 };
 
-bool operator<(const Date& lhs, const Date& rhs);
+bool operator<(const Date& lhs, const Date& rhs){
+    if(lhs.GetYear() == rhs.GetYear()){
+        if(lhs.GetMonth() == rhs.GetMonth()){
+            if(lhs.GetDay() < rhs.GetDay()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }else if(lhs.GetMonth() < rhs.GetMonth()){
+            return true;
+        }else{
+            return false;
+        }
+    }else if(lhs.GetYear() < rhs.GetYear()){
+        return true;
+    }else{
+        return false;
+    }
+}
 
 class Database {
 public:
     void AddEvent(const Date& date, const string& event){
+        for(const auto& item : data[date]){
+            if(item == event){
+                return;
+            }
+        }
 
+        data[date].push_back(event);
+        sort(begin(data[date]), end(data[date]));
     }
 
-    bool DeleteEvent(const Date& date, const string& event);
-    int  DeleteDate(const Date& date);
+    bool DeleteEvent(const Date& date, const string& event){
+        int index = 0;
+        for(const auto& item : data[date]){
+            if(item == event){
+                data[date].erase(begin(data[date]) + index);
+                return true;
+            }
+            index++;
+        }
 
-    /* ??? */ //Find(const Date& date) const;
+        return false;
+    }
+    int  DeleteDate(const Date& date){
+        int count = data[date].size();
+        data[date].clear();
 
-    void Print() const;
+        return count;
+    }
+
+    void Find(const Date& date) const{
+        for(const auto& event : data.at(date)){
+            cout << event << endl;
+        }
+    }
+
+    void Print() const{
+        for(const auto& [date, events] : data) {
+            for(const auto& event : events){
+                cout << setw(4) << setfill('0') << date.GetYear() << "-"
+                     << setw(2) << date.GetMonth()<< "-"
+                     << setw(2) << date.GetDay() << " "
+                     << event << endl;
+            }
+        }
+    }
 
 private:
-    map<Date, vector<string>> date;
+    map<Date, vector<string>> data;
 };
 
 string get_line(string command, int& index){
@@ -141,23 +198,41 @@ int main() {
         int index = 0;
         string operation = get_line(command, index);
 
-        if(operation == "Add"){
-            string str_date = get_line(command, index);
-            string event = get_line(command, index);
+        try{
+            if(operation == "Add"){
+                string str_date = get_line(command, index);
+                string event = get_line(command, index);
 
-            try{
                 Date date(str_date);
-            }catch (exception& ex){
-                cout << ex.what();
+                db.AddEvent(date, event);
+            }else if(operation == "Del"){
+                string str_date = get_line(command, index);
+
+                if(index == command.size()+1){
+                    Date date(str_date);
+                    cout << "Deleted " << db.DeleteDate(date) << " events" << endl;
+                }else{
+                    string event = get_line(command, index);
+
+                    Date date(str_date);
+                    if(db.DeleteEvent(date, event)){
+                        cout << "Deleted successfully" << endl;
+                    }else{
+                        cout << "Event not found" << endl;
+                    }
+                }
+            }else if(operation == "Find"){
+                string str_date = get_line(command, index);
+
+                Date date(str_date);
+                db.Find(date);
+            }else if(operation == "Print"){
+                db.Print();
+            }else{
+                cout << "Unknown command: " << operation << endl;
             }
-        }else if(operation == "Del"){
-
-        }else if(operation == "Find"){
-
-        }else if(operation == "Print"){
-
-        }else{
-            cout << "Unknown command: " << operation << endl;
+        }catch (exception& ex){
+            cout << ex.what() << endl;
         }
     }
 
