@@ -64,7 +64,7 @@ Rational operation(Rational& lhs, Rational& rhs){
     if(rhs_numerator == 0){
         throw domain_error("");
     }
-    
+
     return Rational(lhs_numerator * rhs_denominator, lhs_denominator * rhs_numerator);
 }
 
