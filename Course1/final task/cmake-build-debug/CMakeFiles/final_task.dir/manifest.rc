@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Users/Home/Desktop/Coursera C++/Course1/final task/cmake-build-debug/CMakeFiles/final_task.dir/embed.manifest"
