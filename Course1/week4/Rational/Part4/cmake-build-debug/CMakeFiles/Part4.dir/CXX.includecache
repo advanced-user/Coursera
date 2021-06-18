@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Home/Desktop/Coursera C++/Course1/week4/Rational/Part4/main.cpp
+iostream
+-
+numeric
+-
+sstream
+-
+
