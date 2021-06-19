@@ -11,13 +11,15 @@ using namespace std;
 string read_date(const string& date, int& index){
     string result;
 
-    while(date[index] < '0' || date[index] >= '9'){
+    while(index < date.size() && (date[index] < '0' || date[index] > '9')){
         result += date[index];
         index++;
     }
 
-    result += date[index];
-    index++;
+    if(index < date.size()){
+        result += date[index];
+        index++;
+    }
 
     for(int i = index; i < date.size(); i++){
         index = i;
@@ -28,71 +30,61 @@ string read_date(const string& date, int& index){
 
         result += date[index];
     }
-    index++;
+    if(index < date.size()){
+        index++;
+    }
 
     return result;
 }
 
 class Date {
 public:
-    Date(const string& date){
-        if(date[date.size() - 1] <= '0' || date[date.size() - 1] >= '9'){
-            string message = "Wrong date format: " + date;
-            throw exception(message.c_str());
-        }
-
-        int index = 0;
-
-        string str_year = read_date(date, index);
-        string str_month = read_date(date, index);
-        string str_day = read_date(date, index);
-
-        int year, month, day;
-
+    explicit Date(const string& date){
         try{
-            year = stoi(str_year.c_str());
-        }catch (exception& ex){
-            string message = "Wrong date format: " + date;
-            throw exception(message.c_str());
-        }
+            int index = 0;
 
-        try{
-            month = stoi(str_month.c_str());
+            string str_year = read_date(date, index);
+            string str_month = read_date(date, index);
+            string str_day = read_date(date, index);
 
-            if(month > 12 || month < 1){
-                throw exception();
+            if(index != date.size() || str_day[str_day.size() - 1] < '0' || str_day[str_day.size() - 1] > '9'){
+                throw invalid_argument("");
             }
-        }catch (exception& ex){
-            string message = "Month value is invalid: " + to_string(month);
-            throw exception(message.c_str());
-        }
 
-        try{
-            day = stoi(str_day.c_str());
+            int new_year, new_month, new_day;
 
-            if(day > 31 || day < 1){
-                throw exception();
+            new_year = stoi(str_year);
+            new_month = stoi(str_month);
+
+            if(new_month > 12 || new_month < 1){
+                throw domain_error("Month value is invalid: " + to_string(new_month));
             }
-        }catch (exception& ex){
-            string message = "Day value is invalid: " + to_string(day);
-            throw exception(message.c_str());
+            new_day = stoi(str_day);
+
+            if(new_day > 31 || new_day < 1){
+                throw domain_error("Day value is invalid: " + to_string(new_day));
+            }
+
+            year = new_year;
+            month = new_month;
+            day = new_day;
+        }catch (invalid_argument& ex){
+            string message = "Wrong date format: " + date;
+            throw invalid_argument(message);
+        }catch (domain_error& ex){
+            throw ex;
         }
-
-        this->year = year;
-        this->month = month;
-        this->day =day;
-
     }
 
-    int GetYear() const{
+    [[nodiscard]] int GetYear() const{
         return year;
     }
 
-    int GetMonth() const{
+    [[nodiscard]] int GetMonth() const{
         return month;
     }
 
-    int GetDay() const{
+    [[nodiscard]] int GetDay() const{
         return day;
     }
 
@@ -148,23 +140,27 @@ public:
 
         return false;
     }
-    int  DeleteDate(const Date& date){
+    int DeleteDate(const Date& date){
         int count = data[date].size();
-        data[date].clear();
+        data.erase(date);
 
         return count;
     }
 
     void Find(const Date& date) const{
-        for(const auto& event : data.at(date)){
-            cout << event << endl;
+        if(data.count(date) > 0){
+            for(const auto& event : data.at(date)){
+                cout << event << endl;
+            }
         }
     }
 
     void Print() const{
         for(const auto& [date, events] : data) {
             for(const auto& event : events){
-                cout << setw(4) << setfill('0') << date.GetYear() << "-"
+                if(date.GetYear() < 10000)
+                    cout << setw(4) << setfill('0');
+                cout  << date.GetYear() << "-"
                      << setw(2) << date.GetMonth()<< "-"
                      << setw(2) << date.GetDay() << " "
                      << event << endl;
@@ -177,8 +173,8 @@ private:
 };
 
 string get_line(string command, int& index){
-    string result = "";
-    while(command[index] != ' ' && command.size() > index){
+    string result;
+    while(command.size() > index && command[index] != ' '){
         result += command[index];
         index++;
     }
@@ -230,9 +226,11 @@ int main() {
                 db.Print();
             }else{
                 cout << "Unknown command: " << operation << endl;
+                return 0;
             }
         }catch (exception& ex){
             cout << ex.what() << endl;
+            return 0;
         }
     }
 
