@@ -116,10 +116,3 @@ def get_car_list(csv_filename):
                 continue
 
     return car_list
-
-
-'''
-cars_list = get_car_list('54.csv')
-
-print(len(cars_list))
-'''
